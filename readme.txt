@@ -327,6 +327,13 @@ API, importer hooks, and a REST namespace. Full reference in the repository.
 
 == Changelog ==
 
+= Unreleased =
+
+* Fixed the builder on OpenStation's phone layer: the folded palette and inspector no longer leave a sliver painted over the canvas, cards fold inside a narrow canvas instead of running off its edge, the tab strip scrolls sideways, and the toolbar wraps with its secondary buttons icon-only so Save is always reachable.
+* Added a way to add fields on a phone: an "Add a field" button under the canvas opens the palette as a full-width sheet, and a tap on a chip appends the field — the shell refuses drags on a phone, and a tap previously did nothing.
+* The inspector takes the whole width on a phone and carries a Done control, since the canvas's empty space — the only way to put a selection down — is not there to click.
+* Composite fields and half-width rows in the builder's cards now fold at the width the published form folds at (the card preview is the `atf-form` container form.css asks about).
+
 = 1.1.0 =
 
 * Added private MIO form creation/editing with linked Markdown help, precise validation errors and two correction retries.
