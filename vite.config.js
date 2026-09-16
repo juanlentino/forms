@@ -67,6 +67,10 @@ export default defineConfig( ( { mode } ) => {
 		...( process.env.ATF_MIO_SOURCE ? { server: { fs: { allow: [ process.cwd(), resolve( process.env.ATF_MIO_SOURCE ) ] } } } : {} ),
 		build: {
 			outDir: 'assets/js',
+			// CommonJS auto-detection can wrap AJV differently with a different
+			// module load order. Preserve require semantics consistently so the
+			// committed bundles match clean CI builds.
+			commonjsOptions: { strictRequires: true },
 			emptyOutDir: false,
 			target: 'es2020',
 			minify: isProd ? 'esbuild' : false,

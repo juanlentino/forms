@@ -373,6 +373,12 @@ tests/
 
 ## Portable form packages
 
+The Vite build uses `commonjsOptions.strictRequires: true` to preserve the
+validator's CommonJS initialization order consistently. Automatic wrapper
+detection can vary with module load order, producing different committed bundles
+on CI. Development and production bundles are committed and checked against a
+fresh build before release.
+
 [Version-1 YAML/JSON packages](form-packages.md) wrap the existing form schema with a built-in theme base, sparse theme changes, form overrides, embedded image-choice dependencies and page URL references. Export uses the current builder snapshot; import validates and creates a new draft plus isolated theme/media resources. Existing form storage stays JSON in `ALLTFO_META_SCHEMA`.
 
 `schemas/form-package-v1.schema.json` is the shared contract. The builder and offline CLI use a bundled YAML 1.2 parser and JSON Schema validator. `includes/portability.php` validates decoded JSON against that contract and installed field/token behavior before writes. REST routes accept decoded JSON; PHP needs no YAML runtime. See [form-packages.md](form-packages.md) for routes, size limits, dependency handling and rollback behavior.
