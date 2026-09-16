@@ -12,7 +12,7 @@
  */
 
 import { readFileSync } from 'node:fs';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Builder } from '../../src/builder';
 import type { FieldType, FormSchema } from '../../src/types';
 
@@ -60,7 +60,14 @@ function tap( chip: HTMLElement ): void {
 }
 
 describe( 'a palette chip on a phone', () => {
+	beforeEach( () => {
+		// Keep delayed focus and autosave work from outliving the fixture.
+		vi.useFakeTimers();
+	} );
+
 	afterEach( () => {
+		vi.clearAllTimers();
+		vi.useRealTimers();
 		document.body.replaceChildren();
 		delete ( window as unknown as { wp?: unknown } ).wp;
 	} );

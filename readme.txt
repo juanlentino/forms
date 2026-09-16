@@ -1,11 +1,11 @@
 === AllTerrain Forms ===
-Contributors: allterraindeveloper
+Contributors: allterraindeveloper, juanml
 Tags: contact form, form builder, survey, quiz, conditional logic
 Requires at least: 6.9
 Tested up to: 7.1
 Requires PHP: 7.4
 Requires Plugins: desktop-mode
-Stable tag: 1.1.0
+Stable tag: 1.2.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -327,12 +327,14 @@ API, importer hooks, and a REST namespace. Full reference in the repository.
 
 == Changelog ==
 
-= Unreleased =
+= 1.2.0 =
 
-* Fixed the builder on OpenStation's phone layer: the folded palette and inspector no longer leave a sliver painted over the canvas, cards fold inside a narrow canvas instead of running off its edge, the tab strip scrolls sideways, and the toolbar wraps with its secondary buttons icon-only so Save is always reachable.
-* Added a way to add fields on a phone: an "Add a field" button under the canvas opens the palette as a full-width sheet, and a tap on a chip appends the field — the shell refuses drags on a phone, and a tap previously did nothing.
-* The inspector takes the whole width on a phone and carries a Done control, since the canvas's empty space — the only way to put a selection down — is not there to click.
-* Composite fields and half-width rows in the builder's cards now fold at the width the published form folds at (the card preview is the `atf-form` container form.css asks about).
+* Build forms on your phone: open "Add a field", tap a field type, and edit it in a full-width inspector with a Done button to return to the canvas.
+* Keep Save and other toolbar actions within reach on narrow screens, with wrapping controls and horizontally scrollable tabs.
+* Fixed folded side panels leaving clipped text over the canvas and field cards overflowing their available width.
+* Name fields and multi-column rows now adapt inside builder previews as they do in published forms.
+* Added keyboard activation for palette fields and larger mobile editing inputs to avoid unwanted zoom on iOS.
+* Thanks to [Juan Lentino (@juanml)](https://profiles.wordpress.org/juanml/) for the mobile builder improvements in PR #56.
 
 = 1.1.0 =
 
@@ -364,6 +366,9 @@ API, importer hooks, and a REST namespace. Full reference in the repository.
 * First release.
 
 == Upgrade Notice ==
+
+= 1.2.0 =
+Build and edit forms comfortably on your phone, with tap-to-add fields, full-width editing panels and reachable Save controls. Existing forms and saved data keep their current format.
 
 = 1.1.0 =
 Export complete forms as YAML, including their theme changes and image choices. Create and update forms with validated MIO assistance on compatible OpenStation shells. Existing forms retain their configuration and publication status.
