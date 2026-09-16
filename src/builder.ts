@@ -601,14 +601,47 @@ export class Builder {
 				return;
 			}
 
-			this.selected = null;
-
-			for ( const card of this.canvas.querySelectorAll( '.atfb-card.is-selected' ) ) {
-				card.classList.remove( 'is-selected' );
-			}
-
-			this.renderInspector();
+			this.putSelectionDown();
 		} );
+	}
+
+	/**
+	 * Puts the selection down without touching the canvas's structure.
+	 *
+	 * The canvas's empty space does this on click; the inspector's own Done
+	 * does it where that space is too scarce to hit — a phone shows one pane
+	 * at a time, and while the inspector is up there is no canvas to click.
+	 */
+	private putSelectionDown(): void {
+		this.selected = null;
+
+		for ( const card of this.canvas.querySelectorAll( '.atfb-card.is-selected' ) ) {
+			card.classList.remove( 'is-selected' );
+		}
+
+		this.renderInspector();
+	}
+
+	/**
+	 * Opens or closes the palette fly-over a phone-width window uses.
+	 *
+	 * Below 640px the palette has no resting track; the canvas's "Add a
+	 * field" button opens it over the canvas and a tap on a chip closes it
+	 * again. At any wider width the class changes nothing — the stylesheet
+	 * only reads it inside that container query — so this is safe to call
+	 * unconditionally. The fly-over and a selection are exclusive: opening
+	 * one puts the other down, since the two rails share one track there.
+	 */
+	private togglePalette( open: boolean ): void {
+		if ( open && this.selected ) {
+			this.putSelectionDown();
+		}
+
+		this.root.classList.toggle( 'atfb--palette-open', open );
+
+		if ( open ) {
+			this.palette.querySelector< HTMLElement >( '.atfb-palette__search' )?.focus();
+		}
 	}
 
 	/** Loads everything and paints. */
@@ -1711,7 +1744,19 @@ export class Builder {
 			},
 		} );
 
-		this.palette.append( search );
+		// The head only shows in the phone fly-over, where the palette has a
+		// way in (the canvas's "Add a field") and so needs a way out.
+		const close = button( 'Close', () => this.togglePalette( false ), 'ghost', 'no-alt' );
+
+		close.classList.add( 'atfb-palette__close' );
+
+		this.palette.append(
+			el( 'div', {
+				class: 'atfb-palette__head',
+				children: [ el( 'h3', { class: 'atfb-group__title', text: 'Add a field' } ), close ],
+			} ),
+			search
+		);
 
 		for ( const [ slug, label ] of Object.entries( this.config.groups ) ) {
 			const types = grouped.get( slug );
@@ -1753,24 +1798,48 @@ export class Builder {
 			children: [ icon( type.icon ), el( 'span', { text: type.label } ) ],
 		} );
 
+		// Whether the drag manager took the current press. It declines one it
+		// will not drive — the shell refuses every drag on a phone, and the
+		// fallback refuses a second button — and a declined press never
+		// reaches `onClickOnly`, so the click below has to add the field
+		// itself. A keyboard activation has no press at all and lands there
+		// too, which is what makes the chip a real button.
+		let pressTaken = false;
+
 		chip.addEventListener( 'pointerdown', ( event ) => {
 			const ghost = el( 'div', {
 				class: 'atfb-chip atfb-chip--ghost',
 				children: [ icon( type.icon ), el( 'span', { text: type.label } ) ],
 			} );
 
-			getDragManager().start( {
-				payload: buildPayload( FIELD_PAYLOAD_TYPE, chip, { fieldType: type.type, isNew: true }, event, ghost ),
-				origin: event,
-				onClickOnly: () => this.addField( type.type ),
-			} );
+			pressTaken =
+				null !==
+				getDragManager().start( {
+					payload: buildPayload( FIELD_PAYLOAD_TYPE, chip, { fieldType: type.type, isNew: true }, event, ghost ),
+					origin: event,
+					onClickOnly: () => {
+						this.addField( type.type );
+						this.togglePalette( false );
+					},
+				} );
 		} );
 
 		// A press that becomes a drag must not also fire a click. The manager
 		// records when a drag ended, and that window is what this checks.
 		chip.addEventListener( 'click', ( event ) => {
+			const taken = pressTaken;
+
+			pressTaken = false;
+
 			if ( getDragManager().recentlyEndedDrag() ) {
 				event.preventDefault();
+
+				return;
+			}
+
+			if ( ! taken ) {
+				this.addField( type.type );
+				this.togglePalette( false );
 			}
 		} );
 
@@ -1810,6 +1879,10 @@ export class Builder {
 			list.append( this.renderFieldCard( field, index ) );
 		} );
 
+		const add = button( 'Add a field', () => this.togglePalette( true ), 'secondary', 'plus-alt2' );
+
+		add.classList.add( 'atfb-canvas__add' );
+
 		const inner = el( 'div', {
 			class: 'atfb-canvas__inner',
 			children: [
@@ -1819,6 +1892,7 @@ export class Builder {
 					title: 'Paste this anywhere to place the form',
 				} ),
 				list,
+				add,
 			],
 		} );
 
@@ -3650,6 +3724,7 @@ export class Builder {
 	/** Selects a field and shows it in the inspector. */
 	private selectField( fieldId: string ): void {
 		this.selected = fieldId;
+		this.root.classList.remove( 'atfb--palette-open' );
 
 		// Selection repaints the *selected state*, not the canvas.
 		//
@@ -3802,7 +3877,16 @@ export class Builder {
 			this.renderCanvas();
 		};
 
-		this.inspector.append( el( 'h3', { class: 'atfb-inspector__title', text: definition?.label ?? field.type } ) );
+		const done = button( 'Done', () => this.putSelectionDown(), 'ghost', 'yes' );
+
+		done.classList.add( 'atfb-inspector__done' );
+
+		this.inspector.append(
+			el( 'div', {
+				class: 'atfb-inspector__head',
+				children: [ el( 'h3', { class: 'atfb-inspector__title', text: definition?.label ?? field.type } ), done ],
+			} )
+		);
 
 		if ( parent ) {
 			this.inspector.append(

@@ -476,6 +476,11 @@ npm run test:e2e
 
 `ATF_E2E_URL`, `ATF_E2E_USER`, and `ATF_E2E_PASSWORD` override the default local URL (`http://localhost:8889`) and `admin` / `password` test account. The test creates its own form/theme and deletes them afterward. On an older development database, reactivate AllTerrain Forms to refresh its capabilities first.
 
+The phone builder regression also requires OpenStation enabled for the test user.
+It checks tap-to-add, the full-width inspector, card bounds, saving and reopening,
+and the transition back to the desktop layout. Run it on its own with
+`npx playwright test tests/e2e/builder-phone.spec.ts`.
+
 ### MIO form editing
 
 With OpenStation's compatible window MIO API, open AllTerrain Forms and use **Ask

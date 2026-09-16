@@ -3,7 +3,7 @@
  * Plugin Name:       AllTerrain Forms
  * Plugin URI:        https://github.com/AllTerrainDeveloper/forms
  * Description:       Forms for WordPress with every premium feature free — conditional logic, calculations, multi-page, file uploads, signatures, repeaters, entry management, ten themes — built as an OpenStation desktop app with a drag-and-drop builder.
- * Version:           1.1.0
+ * Version:           1.2.0
  * Requires at least: 6.9
  * Requires PHP:      7.4
  * Requires Plugins:  desktop-mode
@@ -55,7 +55,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'ALLTFO_VERSION', '1.1.0' );
+define( 'ALLTFO_VERSION', '1.2.0' );
 define( 'ALLTFO_FILE', __FILE__ );
 define( 'ALLTFO_DIR', plugin_dir_path( __FILE__ ) );
 define( 'ALLTFO_URL', plugin_dir_url( __FILE__ ) );

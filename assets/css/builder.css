@@ -284,63 +284,6 @@
 	grid-template-columns: 1fr;
 }
 
-/* A window dragged narrow is still a usable window. Container queries rather
-   than media queries, because the width that matters is the window's, and the
-   viewport knows nothing about it. */
-@container ( max-width: 900px ) {
-	/* One rail's worth of room, so the rails become mutually exclusive and
-	   trade places with a fly-over: selecting a field slides the palette out
-	   and the inspector in from its own right side; putting the selection
-	   down (a click on the canvas's empty space) plays it backwards. The
-	   tracks themselves animate — Chromium interpolates grid columns — and
-	   the contents fade rather than squeeze. */
-	.atfb__body {
-		grid-template-columns: 200px minmax( 0, 1fr ) 0px;
-		transition: grid-template-columns 0.28s ease;
-	}
-
-	.atfb__palette,
-	.atfb__inspector {
-		overflow: hidden;
-		transition: opacity 0.18s ease;
-	}
-
-	.atfb__inspector {
-		opacity: 0;
-		pointer-events: none;
-	}
-
-	.atfb--has-selection .atfb__body {
-		grid-template-columns: 0px minmax( 0, 1fr ) 280px;
-	}
-
-	.atfb--has-selection .atfb__palette {
-		opacity: 0;
-		pointer-events: none;
-	}
-
-	.atfb--has-selection .atfb__inspector {
-		opacity: 1;
-		pointer-events: auto;
-	}
-}
-
-@container ( max-width: 640px ) {
-	.atfe__body {
-		grid-template-columns: 1fr;
-	}
-
-	/* No room for a resting rail at all: the palette starts folded too, and
-	   the inspector still flies in over selection. */
-	.atfb__body {
-		grid-template-columns: 0px minmax( 0, 1fr ) 0px;
-	}
-
-	.atfb--has-selection .atfb__body {
-		grid-template-columns: 0px minmax( 0, 1fr ) 240px;
-	}
-}
-
 .atfb__palette,
 .atfb__inspector,
 .atfs__controls {
@@ -358,6 +301,210 @@
 
 .atfb__inspector {
 	border-inline-start: 1px solid var( --atfb-border );
+}
+
+/* The controls the folded layouts add — the inspector's Done, the palette
+   fly-over's Close, the canvas's "Add a field" — do nothing in the three-pane
+   layout and are not drawn there. The container queries below switch them on.
+   The two buttons are qualified by the root because `.atfb-button` — which
+   they also wear, and which is declared later — would otherwise win the
+   cascade at equal specificity and draw them everywhere. */
+.atfb .atfb-inspector__done,
+.atfb .atfb-canvas__add,
+.atfb-palette__head {
+	display: none;
+}
+
+.atfb-palette__head {
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	margin-block-end: 12px;
+}
+
+.atfb-palette__head .atfb-group__title {
+	margin: 0;
+}
+
+.atfb-inspector__head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+}
+
+.atfb-inspector__head .atfb-inspector__title {
+	flex: 1 1 auto;
+	min-inline-size: 0;
+}
+
+.atfb-canvas__add {
+	inline-size: 100%;
+	justify-content: center;
+	margin-block-start: 8px;
+}
+
+/* The folded layouts below zero a rail's padding and border; they must come
+   after the resting rules above, since the cascade decides at equal specificity. */
+/* A window dragged narrow is still a usable window. Container queries rather
+   than media queries, because the width that matters is the window's, and the
+   viewport knows nothing about it. */
+@container ( max-width: 900px ) {
+	/* One rail's worth of room, so the rails become mutually exclusive and
+	   trade places with a fly-over: selecting a field slides the palette out
+	   and the inspector in from its own right side; putting the selection
+	   down (a click on the canvas's empty space, or the inspector's Done)
+	   plays it backwards. The tracks themselves animate — Chromium
+	   interpolates grid columns — and the contents fade rather than squeeze.
+
+	   A folded rail is `atfb-rail--folded`: a 0px track does not zero out
+	   the item's own padding, and 14px on each side of nothing is a 28px
+	   sliver that `overflow: hidden` clips at the *padding* edge — so the
+	   first letters of every group title stayed painted over the canvas.
+	   The padding and the border fold with the track. */
+	.atfb__body {
+		grid-template-columns: 200px minmax( 0, 1fr ) 0px;
+		transition: grid-template-columns 0.28s ease;
+	}
+
+	.atfb__palette,
+	.atfb__inspector {
+		overflow: hidden;
+		transition: opacity 0.18s ease;
+	}
+
+	.atfb__inspector,
+	.atfb--has-selection .atfb__palette {
+		padding: 0;
+		border: 0;
+		opacity: 0;
+		pointer-events: none;
+	}
+
+	.atfb--has-selection .atfb__body {
+		grid-template-columns: 0px minmax( 0, 1fr ) 280px;
+	}
+
+	.atfb--has-selection .atfb__inspector {
+		padding: 14px;
+		border-inline-start: 1px solid var( --atfb-border );
+		opacity: 1;
+		pointer-events: auto;
+	}
+
+	/* With the canvas's empty space the only way to put a selection down,
+	   and little of it left, the inspector carries its own way back. */
+	.atfb .atfb-inspector__done {
+		display: inline-flex;
+	}
+}
+
+@container ( max-width: 640px ) {
+	.atfe__body {
+		grid-template-columns: 1fr;
+	}
+
+	/* No room for a resting rail at all. The palette starts folded, and
+	   opens as a full-width fly-over from the canvas's own "Add a field"
+	   button (the shell refuses drags on a phone, so a chip is tapped, not
+	   dragged — and the tap closes the fly-over again). The inspector takes
+	   the whole width too: one pane at a time, which is how the shell's own
+	   apps fold, with Done in its head as the way back. */
+	.atfb__body {
+		grid-template-columns: 0px minmax( 0, 1fr ) 0px;
+	}
+
+	.atfb__palette {
+		padding: 0;
+		border: 0;
+		opacity: 0;
+		pointer-events: none;
+	}
+
+	.atfb--palette-open .atfb__body {
+		grid-template-columns: minmax( 0, 1fr ) 0px 0px;
+	}
+
+	.atfb--palette-open .atfb__palette {
+		padding: 14px;
+		opacity: 1;
+		pointer-events: auto;
+	}
+
+	.atfb--has-selection .atfb__body {
+		grid-template-columns: 0px 0px minmax( 0, 1fr );
+	}
+
+	.atfb--has-selection .atfb__inspector {
+		border: 0;
+	}
+
+	/* The canvas folds behind either fly-over, and a 0px track leaves its
+	   20px of padding painting the selected card's edge through the
+	   inspector unless the padding folds with it. */
+	.atfb--has-selection .atfb__canvas,
+	.atfb--palette-open .atfb__canvas {
+		padding: 0;
+		overflow: hidden;
+	}
+
+	.atfb-palette__head {
+		display: flex;
+	}
+
+	.atfb .atfb-canvas__add {
+		display: inline-flex;
+	}
+
+	/* A card's title bar holds the type, the Required switch and the
+	   condition badge in one row; on a card this narrow the badges ran past
+	   its edge. They wrap under the type instead, and the type itself stays
+	   on one line — "Single line" broke in two before the badges did. */
+	.atfb-card__head {
+		flex-wrap: wrap;
+	}
+
+	.atfb-card__type {
+		white-space: nowrap;
+	}
+
+	/* The tab strip scrolls sideways rather than clipping its last tab —
+	   the shell's own convention for a window's tab strip on a phone. The
+	   inset keeps the focus ring inside the scroller, which would otherwise
+	   clip it. */
+	.atfb-tabs {
+		flex: 1 1 100%;
+		min-inline-size: 0;
+		overflow-x: auto;
+		scrollbar-width: none;
+		padding: 3px;
+		margin: -3px;
+	}
+
+	.atfb-tabs::-webkit-scrollbar {
+		display: none;
+	}
+
+	/* Ten toolbar buttons do not fit a phone in one row with their labels
+	   on. The secondary ones go icon-only — the label stays for assistive
+	   tech, off-screen — and the row is allowed to wrap, so the primary
+	   actions keep their words and every button stays reachable. Before
+	   this, the row was 885px wide in a 357px window and Save was cut off. */
+	.atfb-bar__right {
+		flex-wrap: wrap;
+		margin-inline-start: 0;
+	}
+
+	.atfb-bar__right .atfb-button--secondary > span:not( .dashicons ) {
+		position: absolute;
+		inline-size: 1px;
+		block-size: 1px;
+		margin: -1px;
+		padding: 0;
+		overflow: hidden;
+		clip-path: inset( 50% );
+		white-space: nowrap;
+	}
 }
 
 .atfb__canvas,
@@ -472,6 +619,11 @@
 
 .atfb-canvas__list {
 	display: grid;
+	/* An explicit column, and one that may shrink. The implicit `auto` track
+	   sized itself to the widest card's min-content — a Name card's two
+	   inputs side by side — so every card ran past a narrow canvas's right
+	   edge instead of folding inside it. */
+	grid-template-columns: minmax( 0, 1fr );
 	gap: 8px;
 	min-block-size: 120px;
 	padding: 8px;
@@ -1527,6 +1679,27 @@ html body.atf-drag-active [contenteditable="true"] {
 	background: var( --atfb-preview-ground );
 	color: var( --atf-text, #1e1e1e );
 	color-scheme: light;
+}
+
+/* The card preview is the front end's `.atf-form` without the front end's
+   `.atf-form-wrap` around it — and the wrap is what `form.css` names
+   `atf-form`, the container every one of its stacking rules asks about. With
+   no container of that name above it, a preview never stacked a composite
+   field's parts or a half-width row however narrow the card got, and the
+   canvas grew to fit the widest card instead. The preview is that container
+   here, so a card folds exactly as the published form does at the same width. */
+.atfb-preview {
+	container-type: inline-size;
+	container-name: atf-form;
+}
+
+/* On a phone, iOS zooms the page into any focused control smaller than 16px
+   and never zooms back out — the shell raises its own kit's fields for that
+   reason (`docs/mobile.md`) and asks a plugin's own inputs to follow. The
+   card preview is exempt: its fields are the form's theme at the theme's
+   size, and a phone is exactly where that size is worth seeing honestly. */
+html[data-os-mode='mobile'] :is( .atfb, .atfe, .atfs, .atfa ) :is( input, textarea, select ):not( .atfb-preview * ) {
+	font-size: 16px;
 }
 
 /* -------------------------------------------------------------------------- */
